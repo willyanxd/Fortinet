@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Checkpoint } from '../types';
 import { XPBadge } from './XPBadge';
 import { CheckpointModal } from './CheckpointModal';
-import { CheckCircle, Circle, Book, HelpCircle, Wrench, Eye } from 'lucide-react';
+import { CheckCircle, Circle, Book, HelpCircle, Wrench, Eye, FileText } from 'lucide-react';
 
 interface CheckpointCardProps {
   checkpoint: Checkpoint;
@@ -38,6 +38,29 @@ export const CheckpointCard: React.FC<CheckpointCardProps> = ({
     }
   };
 
+  const formatPageRange = (pages: number[]) => {
+    if (pages.length === 0) return '';
+    if (pages.length === 1) return `Page ${pages[0]}`;
+    
+    // Sort pages and create ranges
+    const sortedPages = [...pages].sort((a, b) => a - b);
+    const ranges: string[] = [];
+    let start = sortedPages[0];
+    let end = sortedPages[0];
+    
+    for (let i = 1; i < sortedPages.length; i++) {
+      if (sortedPages[i] === end + 1) {
+        end = sortedPages[i];
+      } else {
+        ranges.push(start === end ? `${start}` : `${start}-${end}`);
+        start = end = sortedPages[i];
+      }
+    }
+    ranges.push(start === end ? `${start}` : `${start}-${end}`);
+    
+    return `Pages ${ranges.join(', ')}`;
+  };
+
   return (
     <>
       <motion.div
@@ -63,6 +86,17 @@ export const CheckpointCard: React.FC<CheckpointCardProps> = ({
           </div>
           <XPBadge xp={checkpoint.xpReward} />
         </div>
+
+        {/* PDF Pages Reference */}
+        {checkpoint.pdfPages.length > 0 && (
+          <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="flex items-center space-x-2 text-sm text-gray-700">
+              <FileText className="w-4 h-4" />
+              <span className="font-medium">Study Guide Reference:</span>
+              <span>{formatPageRange(checkpoint.pdfPages)}</span>
+            </div>
+          </div>
+        )}
 
         <div className="flex items-center justify-between">
           <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getTypeColor(checkpoint.type)}`}>

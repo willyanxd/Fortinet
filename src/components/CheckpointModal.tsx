@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Checkpoint, QuizQuestion } from '../types';
-import { X, Lightbulb, Target, Award } from 'lucide-react';
+import { X, Lightbulb, Target, Award, FileText, ExternalLink } from 'lucide-react';
 import { XPBadge } from './XPBadge';
 
 interface CheckpointModalProps {
@@ -66,6 +66,28 @@ export const CheckpointModal: React.FC<CheckpointModalProps> = ({
     setShowResults(false);
   };
 
+  const formatPageRange = (pages: number[]) => {
+    if (pages.length === 0) return '';
+    if (pages.length === 1) return `Page ${pages[0]}`;
+    
+    const sortedPages = [...pages].sort((a, b) => a - b);
+    const ranges: string[] = [];
+    let start = sortedPages[0];
+    let end = sortedPages[0];
+    
+    for (let i = 1; i < sortedPages.length; i++) {
+      if (sortedPages[i] === end + 1) {
+        end = sortedPages[i];
+      } else {
+        ranges.push(start === end ? `${start}` : `${start}-${end}`);
+        start = end = sortedPages[i];
+      }
+    }
+    ranges.push(start === end ? `${start}` : `${start}-${end}`);
+    
+    return `Pages ${ranges.join(', ')}`;
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -99,12 +121,34 @@ export const CheckpointModal: React.FC<CheckpointModalProps> = ({
 
               <p className="text-gray-600 mb-6">{checkpoint.description}</p>
 
+              {/* PDF Reference Section */}
+              {checkpoint.pdfPages.length > 0 && (
+                <div className="mb-6 p-4 bg-fortinet-red bg-opacity-5 rounded-lg border border-fortinet-red border-opacity-20">
+                  <div className="flex items-center mb-3">
+                    <FileText className="w-5 h-5 text-fortinet-red mr-2" />
+                    <h3 className="font-semibold text-fortinet-red">Study Guide Reference</h3>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-gray-700">
+                      <strong>FortiGate 7.6 Administrator Study Guide:</strong> {formatPageRange(checkpoint.pdfPages)}
+                    </p>
+                    <div className="flex items-center text-sm text-fortinet-red">
+                      <ExternalLink className="w-4 h-4 mr-1" />
+                      <span>Open PDF to study</span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-2">
+                    📖 Read the specified pages in the study guide before proceeding with this checkpoint.
+                  </p>
+                </div>
+              )}
+
               {/* Tips Section */}
               {checkpoint.tips.length > 0 && (
                 <div className="mb-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
                   <div className="flex items-center mb-3">
                     <Lightbulb className="w-5 h-5 text-yellow-600 mr-2" />
-                    <h3 className="font-semibold text-yellow-800">Tips</h3>
+                    <h3 className="font-semibold text-yellow-800">Study Tips</h3>
                   </div>
                   <ul className="space-y-2">
                     {checkpoint.tips.map((tip, index) => (
@@ -122,7 +166,7 @@ export const CheckpointModal: React.FC<CheckpointModalProps> = ({
                 <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                   <div className="flex items-center mb-3">
                     <Target className="w-5 h-5 text-blue-600 mr-2" />
-                    <h3 className="font-semibold text-blue-800">Key Points</h3>
+                    <h3 className="font-semibold text-blue-800">Key Learning Points</h3>
                   </div>
                   <ul className="space-y-2">
                     {checkpoint.keyPoints.map((point, index) => (
@@ -253,6 +297,21 @@ export const CheckpointModal: React.FC<CheckpointModalProps> = ({
                       Retake Quiz
                     </button>
                   </div>
+                </div>
+              )}
+
+              {/* Lab Instructions for Lab Type */}
+              {checkpoint.type === 'lab' && (
+                <div className="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
+                  <div className="flex items-center mb-3">
+                    <Wrench className="w-5 h-5 text-green-600 mr-2" />
+                    <h3 className="font-semibold text-green-800">Lab Exercise</h3>
+                  </div>
+                  <p className="text-green-700 text-sm">
+                    This is a hands-on lab exercise. Follow the instructions in the study guide pages referenced above 
+                    to complete the practical configuration tasks. Mark as complete when you have successfully 
+                    performed the lab steps.
+                  </p>
                 </div>
               )}
 

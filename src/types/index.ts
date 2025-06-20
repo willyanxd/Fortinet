@@ -28,6 +28,7 @@ export interface Checkpoint {
   isCompleted: boolean;
   tips: string[];
   keyPoints: string[];
+  pdfPages: number[];
   quiz?: QuizQuestion[];
 }
 
